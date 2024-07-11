@@ -1,4 +1,9 @@
 # image-processing-lambda
+Lambda@Edge + Typescript 기반의 이미지 프로세싱 람다입니다.
+sharp 라이브러리는 로컬에서 m1 mac으로 실행하는 경우 버전을 낮춰서 설치하는 것을 권장합니다.
+
+- [Lambda@Edge + Typscript로 이미지 리사이징 적용하기](https://gkscode.tistory.com/90)
+
 ## 설정
 - 이벤트
     ```yaml
