@@ -1,0 +1,52 @@
+service: image-processing-lambda
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-east-1
+  architecture: x86_64
+  timeout: 30
+  memorySize: 256
+  iam:
+    role: <iam arn>
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+  - serverless-lambda-edge-pre-existing-cloudfront
+
+package:
+  individually: true
+
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    target: 'node16'
+    define: { 'require.resolve': undefined }
+    platform: 'node'
+    concurrency: 10
+    external: ['sharp']
+    packagerOptions:
+      scripts:
+        - rm -rf node_modules/sharp
+        - npm install --arch=x64 --platform=linux sharp
+        # - npm install sharp@0.32.0 # 로컬에서 실행
+
+functions:
+  imageProcessingHandler:
+    name: image-processing-lambda-edge-${sls:stage}
+    handler: handler.imageProcessingHandler
+    events:
+      - preExistingCloudFront:
+          distributionId: ${file(./config.${opt:stage, 'dev'}.json):CF_DISTRIBUTION_ID}
+          eventType: origin-response
+          pathPattern: '*'
+          includeBody: false 
+          stage: ${sls:stage}
+      
